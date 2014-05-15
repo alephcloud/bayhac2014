@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <style type="text/css">
+            body { font-family:verdana; font-size: 10pt}
+        </style>
+        <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.0/jquery.min.js"></script>
+        <script type="text/javascript" src="./src/Client.js"></script>
+        <script type="text/javascript">
+            $(document).ready(function() {
+                var logg = function(str) { console.log(str); return; }
+                var api = new API();
+                var isEncrypted = false;
+                $("#cryptBut").click(function(e) {
+                    var but = this;
+                    if (! isEncrypted) {
+                        var pwd = $("#password").val();
+                        var msg = $("#mailbody").val();
+                        api.encrypt_with_password({ "password" : btoa(pwd), "plain_text" : btoa(msg)}, logg, logg, function (r) {
+                            $("#mailbody").val(r.cipher_text);
+                            isEncrypted = true;
+                            $("#mailbody").prop("disabled", true);
+                            $(but).text("Decrypt");
+                        });
+                    } else {
+                        var pwd = $("#password").val();
+                        var msg = $("#mailbody").val();
+                        api.decrypt_with_password({"password" : btoa(pwd), "cipher_text" : msg}, logg, logg, function (r) {
+                            $("#mailbody").val(atob(r.plain_text));
+                            isEncrypted = false;
+                            $("#mailbody").prop("disabled",false);
+                            $(but).text("Encrypt");
+                        });
+                    }
+                });
+
+                $("#sendBut").click(function(e){
+                    var but = this;
+                    var email = $("#mailaddress").val();
+                    var subject = $("#subject").val();
+                    var msg = $("#mailbody").val();
+                    window.open('mailto:' + email + '?subject=' + subject + '&body=' + msg);
+                });
+            });
+        </script>
+    </head>
+    <body>
+        <h1>CryptMail</h1>
+        <div>
+            <div>Address:</div>
+            <textarea id="mailaddress" rows="1" cols="100" required placeholder="address" autocomplete="on" spellcheck="false"></textarea>
+            <div>Subject:</div>
+            <textarea id="subject" rows="1" cols="100" required placeholder="subject" autocomplete="on" spellcheck="true"></textarea>
+            <div>Message:</div>
+            <textarea id="mailbody" rows="5" cols="100" placeholder="message" spellcheck="true"></textarea>
+            <div>Password:</div>
+            <textarea id="password" rows="1" cols="50" placeholder="encryption password" spellcheck="false"></textarea>
+            <div>
+                <button id="cryptBut">Encrypt</button>
+                <button id="sendBut">send</button>
+            </div>
+        </div>
+    </body>
+</html>
+

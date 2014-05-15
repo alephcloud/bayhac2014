@@ -32,13 +32,6 @@ import Prelude.Unicode
 import qualified BayHac2014.Cryptmail.Text as T
 import BayHac2014.Cryptmail.Json.Types
 
-#ifdef __HASTE__
-
-import Haste
-import Haste.Prim
-
-#endif
-
 -- ---------------------------------- --
 -- Basic Values
 

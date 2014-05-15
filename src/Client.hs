@@ -12,9 +12,7 @@ module Main
 ( main
 ) where
 
-import Control.Error
 import Control.Monad
-import Control.Monad.IO.Class
 
 import Data.Monoid.Unicode
 
@@ -28,9 +26,7 @@ import Prelude.Unicode
 
 main ∷ IO ()
 main = do
-
     writeLog "Register API"
-
     register "encrypt_with_password" (asyncRequest ∷ RequestApiMethod EncryptWithPwd)
     register "decrypt_with_password" (asyncRequest ∷ RequestApiMethod DecryptWithPwd)
 
@@ -73,39 +69,32 @@ register call fun = do
     writeLog $ "Register API method: " ⊕ fromJSStr call
 
     -- register callback
-    js_add_api_method call $! mkCallback $ \a lb fb sb → void ∘ runEitherT $ do
+    js_add_api_method call $! mkCallback $ \a lb fb sb → void $ do
 
         let successCb = js_callv sb ∘ toPtr
             failureCb = js_calls fb ∘ toPtr
             logCb = js_calls lb ∘ toPtr
-            lbIO = liftIO ∘ logCb
-            failure ∷ ∀ α . JSString → EitherT String IO α → EitherT () IO α
-            failure e = handleT $ \m → do
-                let e' = e ⊕ ": " ⊕ toJSStr m
-                lbIO e'
-                setTimeout 0 $ failureCb e'
-                left ()
 
-        lbIO $ "API call: " ⊕ call
+        logCb $ "API call: " ⊕ call
 
         -- parse input argument
-        arg ← failure "failed to parse input" ∘ hoistEither ∘ parseEither parseJSON ∘ fromPtr $ a
+        case parseEither parseJSON ∘ fromPtr $ a of
+            Left m → do
+                let e' = "failed to parse input: " ⊕ toJSStr m
+                logCb e'
+                setTimeout 0 $ failureCb e'
+            Right arg → do
+                logCb $ "Argument: " ⊕ encode (fromPtr a)
 
-        lbIO $ "Argument: " ⊕ encode (fromPtr a)
+                -- execute the method
+                let sb' r = do
+                        let jr = toJSON r
+                        logCb $ "Result: " ⊕ encode jr
+                        successCb (toPtr jr)
+                    fb' e = do
+                        let errMsg = "failed to run method " ⊕ call ⊕ ": " ⊕ e
+                        logCb errMsg
+                        failureCb errMsg
 
-        -- execute the method
-        let sb' r = do
-                let jr = toJSON r
-                logCb $ "Result: " ⊕ encode jr
-                successCb (toPtr jr)
-            fb' e = do
-                let errMsg = "failed to run method " ⊕ call ⊕ ": " ⊕ e
-                logCb errMsg
-                failureCb errMsg
-
-        setTimeout 0 $ fun arg logCb fb' sb'
-
-progress ∷ MonadIO μ ⇒ JSString → μ ()
-progress = setTimeout 0 ∘ writeLog ∘ fromJSStr -- FIXME
-
+                setTimeout 0 $ fun arg logCb fb' sb'
 

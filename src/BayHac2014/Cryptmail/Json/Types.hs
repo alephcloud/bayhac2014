@@ -74,12 +74,6 @@ import Prelude.Unicode
 
 import qualified BayHac2014.Cryptmail.Text as T
 
-#ifdef __HASTE__
-
-import Haste hiding (fromString)
-
-#endif
-
 #ifdef TRACE
 import System.IO.Unsafe
 

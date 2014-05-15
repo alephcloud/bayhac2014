@@ -45,7 +45,6 @@ import qualified BayHac2014.Cryptmail.Text as T
 import qualified BayHac2014.Cryptmail.ByteString as B
 
 import Control.Applicative
-import Control.Error
 
 import Data.Monoid.Unicode
 
@@ -77,6 +76,10 @@ import Test.QuickCheck.Monadic
 import Test.QuickCheck.Instances ()
 
 #endif
+
+fmapL ∷ (α → γ) → Either α β → Either γ β
+fmapL f (Left a) = Left (f a)
+fmapL _ (Right a) = Right a
 
 -- -------------------------------------------------------------------------- --
 -- Base64 Serialization
@@ -278,7 +281,7 @@ prop_randomBytes1 = monadicIO $ do
     assert $ b1 ≠ b2
 
 prop_padPkcs70 ∷ B.ByteString → Property
-prop_padPkcs70 b = forAll (choose (1, 255)) $ \i →
+prop_padPkcs70 b = ∀ (choose (1, 255)) $ \i →
     property $ (unpadPKCS7 ∘ padPKCS7 i) b ≡ b
 
 -- This failed for "a\0", "a", "" (or any case where only one of the first two parameters ends with '\0')

@@ -37,7 +37,6 @@ Library
         BayHac2014.Cryptmail.Json.Instances
 
     exposed-modules:
-        -- BayHac2014.Cryptmail.Utils
         BayHac2014.Cryptmail.Text
         BayHac2014.Cryptmail.ByteString
         BayHac2014.Cryptmail.PasswordEncryption

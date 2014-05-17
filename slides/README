@@ -1,0 +1,6 @@
+Compilation of the Slides
+=========================
+
+~~~{.bash}
+pandoc -t revealjs -V theme=lars -o index.html main.md --standalone --include-in-header=main.css
+~~~

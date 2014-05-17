@@ -12,5 +12,5 @@ alert3 = ffi "(function (x) { alert(x); })"
 
 main :: IO ()
 main = do
-    alert2 $ toJSStr "hello world 2"
-    alert3 $ toJSStr "hello world 3"
+    alert2 $ toJSStr "hello bayhac 2"
+    alert3 $ toJSStr "hello bayhac 3"

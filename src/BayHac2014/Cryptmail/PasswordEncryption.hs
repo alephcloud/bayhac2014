@@ -246,6 +246,10 @@ decryptWithPwd (Password pwdBytes) (CipherText cipherTextBytes) =
 
 #ifndef __HASTE__
 
+isRight ∷ Either α β → Bool
+isRight (Right _) = True
+isRight _ = False
+
 deriving instance Arbitrary Password
 deriving instance Arbitrary PlainText
 deriving instance Arbitrary CipherText
@@ -281,7 +285,7 @@ prop_randomBytes1 = monadicIO $ do
     assert $ b1 ≠ b2
 
 prop_padPkcs70 ∷ B.ByteString → Property
-prop_padPkcs70 b = ∀ (choose (1, 255)) $ \i →
+prop_padPkcs70 b = forAll (choose (1, 255)) $ \i →
     property $ (unpadPKCS7 ∘ padPKCS7 i) b ≡ b
 
 -- This failed for "a\0", "a", "" (or any case where only one of the first two parameters ends with '\0')

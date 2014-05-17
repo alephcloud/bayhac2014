@@ -3,7 +3,7 @@
 -- ------------------------------------------------------ --
 
 Name:                bayhac2014-cryptmail
-Version:             0.0.1
+Version:             0.0.2
 Description:
     An application for sending encrypted email from a browser.
     This is an example application for a talk at BayHac 2014

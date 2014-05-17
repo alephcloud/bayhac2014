@@ -19,6 +19,14 @@ Category:            Haste, Cryptography, Web
 Build-type:          Simple
 Cabal-version:       >= 1.18
 
+data-files:
+    README.md
+    contrib/hello-world.hs
+    contrib/hello-world-ffi.hs
+    contrib/hello-world.html
+    contrib/hello-world-ffi.html
+    contrib/Setup.hs
+
 source-repository head
     type:     git
     location: http://github.com/alephcloud/bayhac2014-cryptmail

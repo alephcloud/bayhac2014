@@ -1,0 +1,26 @@
+<style type="text/css">
+
+/* .list { max-height: 100%; float: left; max-width: 60% } */
+
+.image { min-width: 35%; height: 100%; float: right; max-width: 35% }
+
+.image img { min-width: 100%; height: auto; max-height: 80%; max-width: 100% }
+
+.reveal h1 { font-size : 160%; text-align: center }
+
+/* h1.title { font-size : 350% } */
+
+h3.date { font-size: 100%; text-align: center }
+h2.author { font-size: 100%; text-align: center }
+
+.reveal pre { box-shadow: 0 0 0 0 }
+
+.reveal pre code { padding: inherit }
+
+div.footer { position: fixed; right: 0%; top: -50px; }
+
+.reveal .slides { text-align: left; }
+
+.reveal h3 { font-size: 100%; margin-bottom: 1ex; }
+
+</style>

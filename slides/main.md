@@ -136,8 +136,8 @@ git clone https://github.com/alephcloud/bayhac2014
 ~~~
 </div>
 
-Hello BayHac with Haste
-=======================
+Hello World with Haste
+======================
 
 `contrib/hello-bayhac.hs`:
 
@@ -167,6 +167,8 @@ hastec hello-bayhac.hs
     <body/>
 </html>
 ~~~
+
+[Example](../contrib/hello-bayhac.html)
 
 <div class="footer">
 ~~~{.bash}
@@ -336,19 +338,25 @@ module Main
 ( main
 ) where
 
+import Haste
 import Haste.Prim
 import Haste.Foreign
 
 foreign import ccall "alert" alert2 :: JSString -> IO ()
 
-alert3 :: JSString -> IO ()
-alert3 = ffi "(function (x) { alert(x); })"
+alert3 :: JSString -> IO Int
+alert3 = ffi "(function (x) { alert(x); return 0; })"
+
+foreign import ccall "setTimeout" timeout :: JSFun (IO ()) -> Int -> IO ()
 
 main :: IO ()
 main = do
     alert2 $ toJSStr "hello bayhac 2"
     alert3 $ toJSStr "hello bayhac 3"
+    flip timeout 2000 . mkCallback . alert2 . toJSStr $ "hello bayhac 4"
 ~~~
+
+[Example](../contrib/hello-bayhac-ffi.html)
 
 <div class="footer">
 ~~~{.bash}
@@ -367,15 +375,6 @@ Outline
 1.  Example
 2.  Sharing code with native builds
 3.  Exporting an API
-
-<!--
-5.  Debugging and testing
-    1. quick-check (for native and javascript builds)
-    2. compatibility tests (between native and javascript code)
-
-6.  Runtime model, performance, and concurrency
-4.  Build system
--->
 
 <div class="footer">
 ~~~{.bash}
@@ -510,9 +509,7 @@ git clone https://github.com/alephcloud/bayhac2014
 ~~~
 </div>
 
-Result:
-
-[bayhac2014-cryptmail-app](file:///Users/lars/Devel/Code/bayhac2014/Main.html)
+Result: [bayhac2014-cryptmail-app](../Main.html)
 
 Javascript API
 ==============
@@ -532,7 +529,7 @@ api.decrypt_with_password(, logg, logg, function (r) {
 }
 ~~~
 
-The Javascript API behave like service API
+The Javascript API exposes the service API
 
 *   Supports usage of web-workers
 *   Switching between server and client API
@@ -547,19 +544,31 @@ git clone https://github.com/alephcloud/bayhac2014
 Sharing Code with Native Builds
 ===============================
 
+<div class="left" style="padding-right: 1em">
 Examples:
 
 *   Aeson instances
 *   Cryptographic protocols
 *   Special arithmetic
 *   Business logic
+</div>
 
-Abstract low-level dependencies:
+<div>
+Low-level dependencies:
 
 *   Javascript big integers
 *   ByteStrings
 *   Text
 *   Cryptographic primitives
+</div>
+
+<div class="center">
+Dispatch Options:
+
+*   Package level abstraction
+*   Module level abstraction
+*   Code level abstraction with CPP
+</div>
 
 <div class="footer">
 ~~~{.bash}
@@ -602,10 +611,8 @@ git clone https://github.com/alephcloud/bayhac2014
 ~~~
 </div>
 
-Abstraction Low-Level Dependencies
-==================================
-
-Example ByteString:
+Abstraction of Low-Level Modules
+================================
 
 ~~~{.haskell}
 newtype ByteString = ByteString JSAny
@@ -631,14 +638,16 @@ length ∷ ByteString → Int
 length = j_bytesLength
 ~~~
 
-Exporting an API
-================
+Export of Javascript API
+========================
 
 ~~~{.haskell}
 main ∷ IO ()
 main = do
     register "encrypt_with_password" (asyncRequest ∷ ApiMethod EncryptWithPwd)
     register "decrypt_with_password" (asyncRequest ∷ ApiMethod DecryptWithPwd)
+
+-- -------------------------------------------------------------------------- --
 
 type ApiMethod α
     = α                    -- ^ argument
@@ -661,24 +670,34 @@ type FCallback
 foreign import ccall "addApiMethod" js_add_api_method ∷ JSString → JSFun FCallback → IO ()
 ~~~
 
-Issues
-======
+Export of Javascript API
+========================
 
-*   PBKDF2 is made to be expensive
+~~~{.javascript}
+function API () {
+    return this;
+}
 
-    <div class="notes">
-    In the attack model we must assume that the attacker
-    uses the most capable implemenation (which certainly is not implemented in javascript).
-    </div>
+API.prototype.addMethod = function (name, method) {
+    API.prototype[name] = function (arg, log, fail, succ) {
+        var successCB = function (hsResult) {
+            /* convert result from the Haste JSON representation into a Javascript Object */
+        }
+        /* parse the argument object into the Haste JSON representation */
+        /* call the method callback */
+        var mapply = function () { return A(method,[[0,hsArg],[0,log],[0,fail],[0,successCB],0]); };
+        setTimeout(mapply,0);
+    }
+    return 0;
+}
 
-    PBKDF2 execution should be asynchronous or in a web-worker
+function addApiMethod(name, method) {
+    API.prototype.addMethod(name, method);
+}
 
-*   A JSON API requires textual encoding for all values 
-
-    <div class="notes">
-    It would be nice
-    to transparently pass the plaintext and ciphertext as references when possible.
-    </div>
+function calls(f,s) { f(E(s)[1]); }
+function callv(f,v) { f(v[1]); }
+~~~
 
 <div class="footer">
 ~~~{.bash}
@@ -706,31 +725,6 @@ Misc Topics
 <!-- *   building web-workers -->
 *   QuickCheck testing of Javascript builds
 *   Exception handling
-*   Alternatives to usage of CPP
-
-<div class="notes">
-Finally we integrate the haste port of this library in the the web application.
-We want to do the glueing in javascript (otherwise we would have to
-statically link at compiletime, which we don't want). Therefor we
-have to export the library API in javascript. We do this by mimicing
-a service. This would also allow to run the expensive operations
-of the library in a web-worker. It also allows seemlessly decide if
-the server-side implemenation or client side implemenation is used.
-
-We conclude with some performance considerations:
-
-*   PBKDF2 is made to be expensive. In the attack model we must assume that the attacker
-    uses the most capable implemenation (which certainly is no implemented in javascript).
-
-*   The PBKDF2 implemenation should at least be asynchronous or in a web-worker
-
-*   How to do asynchronous operations in Haste?
-
-*   A JSON API requires call be value and a textual encoding! It would be nice
-    to transparently pass the plaintext and ciphertext as references when possible.
-
-</div>
-
 
 <div class="footer">
 ~~~{.bash}

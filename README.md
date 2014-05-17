@@ -15,17 +15,45 @@ The package includes a library component that can be compiled with native
 GHC as well as with the Haste compiler. The library exposes two
 interfaces:
 
-1.  a Haskell API for encryption and decryption with a passphrase and
-2.  a JSON service API that wraps the Haskell API in a JSON data types.
+1.  a Haskell API for encryption and decryption with a password and
+2.  a JSON service API that wraps the Haskell API in JSON data types.
 
-The package further contains a application that serves the JSON
+The package further contains an application that serves the JSON
 API over HTTP using [scotty](http://hackage.haskell.org/package/scotty).
 
-There package also contains an application that exports the JSON API as client
+The package also contains an application that exports the JSON API as client
 side javascript module.
 
-Finally, there is a cabal test suite for testing the functionality
-with a native compilation.
+Finally, there is a cabal test suite for unit testing the library with a native
+compilation.
+
+Setup of Haste with a Sandbox
+=============================
+
+The following instructions installs the haste-compiler in a cabal sandbox.
+Note, however, that the resulting haste-compiler itself is **not** using a
+sandbox for compilations.
+
+Build Haste:
+
+~~~{.bash}
+cabal sandbox init
+echo 'constraints: scientific<0.3' >> cabal.config
+cabal install haste-compiler -j
+export PATH=./.cabal-sandbox/bin:$PATH
+~~~
+
+Setup Haste:
+
+~~~{.bash}
+echo 'solver: topdown' >> ~/.cabal/config
+haste-boot
+sed -i '/solver: topdown/d' ~/.cabal/config
+~~~
+
+If `haste-boot` failes with an error message that inlcude the text `only already
+installed instances can be used` you may try to temporarily add the
+following to your `~/.cabal/config` while running `haste-boot`.
 
 Installation
 ============
@@ -45,9 +73,12 @@ cabal build
 cabal test
 ~~~
 
-The javascript module is build as
+The javascript module is build via
 
 ~~~{.bash}
+mv cabal.sandbox.config cabal.sandbox.config.disabled
+haste-inst install -fhaste
+haste-inst configure -fhaste
 haste-inst build
 ~~~
 

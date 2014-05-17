@@ -21,10 +21,10 @@ Cabal-version:       >= 1.18
 
 data-files:
     README.md
-    contrib/hello-world.hs
-    contrib/hello-world-ffi.hs
-    contrib/hello-world.html
-    contrib/hello-world-ffi.html
+    contrib/hello-bayhac.hs
+    contrib/hello-bayhac-ffi.hs
+    contrib/hello-bayhac.html
+    contrib/hello-bayhac-ffi.html
     contrib/Setup.hs
 
 source-repository head

@@ -5,4 +5,4 @@ module Main
 import Haste
 
 main :: IO ()
-main = alert "hello world"
+main = alert "hello bayhac"

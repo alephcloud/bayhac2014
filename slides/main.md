@@ -136,10 +136,10 @@ git clone https://github.com/alephcloud/bayhac2014
 ~~~
 </div>
 
-Hello World with Haste
-======================
+Hello BayHac with Haste
+=======================
 
-`contrib/hello-world.hs`:
+`contrib/hello-bayhac.hs`:
 
 ~~~{.Haskell}
 module Main
@@ -149,21 +149,21 @@ module Main
 import Haste
 
 main :: IO ()
-main = alert "hello world"
+main = alert "hello bayhac"
 ~~~
 
 Compile: 
 
 ~~~{.bash}
-hastec hello-world.hs
+hastec hello-bayhac.hs
 ~~~
 
-`contrib/hello-world.html`:
+`contrib/hello-bayhac.html`:
 
 ~~~{.html}
 <!DOCTYPE html>
 <html>
-    <head> <script type="text/javascript" src="./hello-world.js"></script></head>
+    <head> <script type="text/javascript" src="./hello-bayhac.js"></script></head>
     <body/>
 </html>
 ~~~
@@ -212,7 +212,6 @@ Haste Runtime
 
 *   Arithmetic
 *   Strings: `toJSStr`, `fromJSStr`
-*   Mutable Variables
 *   `jsAlert`, `jsPrompt`, `jsLog`, `jsEval`, etc.
 *   `jsSetTimeout`
 *   DOM manipulation
@@ -228,7 +227,7 @@ git clone https://github.com/alephcloud/bayhac2014
 Compiled Code
 =============
 
-`contrib/hello-world.hs`:
+`contrib/hello-bayhac.hs`:
 
 ~~~{.haskell}
 module Main
@@ -238,14 +237,14 @@ module Main
 import Haste
 
 main :: IO ()
-main = alert "hello world"
+main = alert "hello bayhac"
 ~~~
 
 Result:
 
 ~~~{.javascript}
 var _0=0,
-    _1=unCStr("hello world"),
+    _1=unCStr("hello bayhac"),
     _2=function(_){var _3=jsAlert(toJSStr(E(_1)));return _0;},
     _4=function(_){return _2(_);};
 var hasteMain = function() {A(_4, [0]);};
@@ -282,7 +281,7 @@ git clone https://github.com/alephcloud/bayhac2014
 Marshaling
 ==========
 
-Example Javascript Code:
+Example code from the Haste runtime:
 
 ~~~{.javascript}
 function arr2lst(arr, elem) {
@@ -347,8 +346,8 @@ alert3 = ffi "(function (x) { alert(x); })"
 
 main :: IO ()
 main = do
-    alert2 $ toJSStr "hello world 2"
-    alert3 $ toJSStr "hello world 3"
+    alert2 $ toJSStr "hello bayhac 2"
+    alert3 $ toJSStr "hello bayhac 3"
 ~~~
 
 <div class="footer">

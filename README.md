@@ -12,7 +12,7 @@ compiler](https://github.com/valderman/haste-compiler).
 Slides
 ======
 
-[http://alephcloud.github.io/bayhac2014/slides/index.html]()
+[http://alephcloud.github.io/bayhac2014/slides/index.html](http://alephcloud.github.io/bayhac2014/slides/index.html)
 
 Overview
 ========

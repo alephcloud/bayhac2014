@@ -1,5 +1,6 @@
-This package contains code for an example Web application for a class at BayHac2014.
-The application allows to create encrypted emails from within a browser.
+This package contains code for an example Web application for a [class at
+BayHac2014](http://alephcloud.github.io/bayhac2014/slides/index.html). The
+application allows to create encrypted emails from within a browser.
 
 **This is not production level code.**
 
@@ -7,6 +8,11 @@ The purpose of this package to demonstrate techniques for development of
 portable Haskell libraries that can be used with native compilations as well as
 cross-compilations to client-side javascript via the [Haste
 compiler](https://github.com/valderman/haste-compiler).
+
+Slides
+======
+
+[http://alephcloud.github.io/bayhac2014/slides/index.html]()
 
 Overview
 ========

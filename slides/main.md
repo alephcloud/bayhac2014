@@ -34,47 +34,6 @@ sed -i '/solver: topdown/d' ~/.cabal/config
 Topics
 ======
 
-<div class="notes">
-A lot of the resources that come with Haste are about using Haste to develop monolithic
-HTML5 web applications with a client and a server component.
-
-This is different from how we use it. We use Haskell primarily as a programing
-language for modeling backend logic and as a systems programing language on the server
-side.
-
-We don't (yet) use Haskell as a front end language or for GUI programing. GUIs included
-web UIs are done by GUI developers who usually use the a framework specific language for
-the respective platform. For the browser this is javascript.
-
-However, for many components that tranditionally would be located on the server side our
-product demands that they are executed on the client side. Specifically these components
-include cryptographic modules and policy enforcement modules. Often these components are
-not platform specific and represent core IP of our company. Therefor it is desireable
-to develop and maintain them by the same developers accross all client platforms and
-ideally in the same code base. Moreoever, these components are developed as services
-that should provide the same API independent if they are used as a network service or
-a library, on the client or on the server side.
-
-This considerations lead to a design where, in the browser we host the same (or
-similar) components that we also use on native clients and on the server side in the cloud.
-
-*So our motivation for using Haste is development of javascript libraries that offer provide
-a well-defined service API in the browser.*
-
-In order to cope with the more standard usage of Haste we will split this class into
-two main topcis:
-
-1.  A general introduction to Haste that covers using Haste for simple examples of
-    web-development, and
-
-2.  a slightly more in depth part about usage of Haste for *backend* development
-    in the browser.
-
-We think that with browser becoming more and more the role of general systems programing
-environments the second point may be of interest beyond our setting that, in our case
-is a direct consequence of our product.
-</div>
-
 1.  Setup and usage of Haste
 
 2.  Development of portable libraries for web applications
@@ -100,16 +59,6 @@ Outline
 ~~~{.bash}
 git clone https://github.com/alephcloud/bayhac2014
 ~~~
-</div>
-
-<div class="notes">
-What is not covered:
-
-*   Concurrency ?
-*   Reactive programing, browser events
-*   Seamless client server app programing
-*   DOM
-*   Ajax calls, websockets
 </div>
 
 Setup Haste
@@ -710,19 +659,10 @@ Misc Topics
 
 *   JSON serialization and marshaling of JSON `Value`
 *   Calling Javascript callbacks from Haskell
-
-<!-- *   Stateful Javascript APIs -->
-
-<!-- ### Runtime and Performance -->
-
 *   Asynchronous callback execution
 *   Concurrency
-
-<!-- ### Build System -->
-
 *   Integration with *haste-ffi-parser*
 *   Managing Javascript dependencies for linked libraries
-<!-- *   building web-workers -->
 *   QuickCheck testing of Javascript builds
 *   Exception handling
 

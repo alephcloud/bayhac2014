@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="generator" content="pandoc">
+  <meta name="author" content="Lars Kuhtz lars@alephcloud.com" />
+  <meta name="dcterms.date" content="2014-05-17" />
+  <title>Haskell in the Browser With Haste</title>
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <link rel="stylesheet" href="reveal.js/css/reveal.min.css"/>
+    <style type="text/css">code{white-space: pre;}</style>
+    <style type="text/css">
+table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode {
+  margin: 0; padding: 0; vertical-align: baseline; border: none; }
+table.sourceCode { width: 100%; line-height: 100%; }
+td.lineNumbers { text-align: right; padding-right: 4px; padding-left: 4px; color: #aaaaaa; border-right: 1px solid #aaaaaa; }
+td.sourceCode { padding-left: 5px; }
+code > span.kw { color: #007020; font-weight: bold; }
+code > span.dt { color: #902000; }
+code > span.dv { color: #40a070; }
+code > span.bn { color: #40a070; }
+code > span.fl { color: #40a070; }
+code > span.ch { color: #4070a0; }
+code > span.st { color: #4070a0; }
+code > span.co { color: #60a0b0; font-style: italic; }
+code > span.ot { color: #007020; }
+code > span.al { color: #ff0000; font-weight: bold; }
+code > span.fu { color: #06287e; }
+code > span.er { color: #ff0000; font-weight: bold; }
+    </style>
+    <link rel="stylesheet" href="reveal.js/css/theme/simple.css" id="theme">
+  <link rel="stylesheet" media="print" href="reveal.js/css/print/pdf.css" />
+  <!--[if lt IE 9]>
+  <script src="reveal.js/lib/js/html5shiv.js"></script>
+  <![endif]-->
+    <style type="text/css">
+    
+    .right { max-height: 100%; float: right; max-width: 60% }
+    .left { max-height: 100%; float: left; max-width: 60% }
+    
+    .reveal div.center { padding-top: 2em}
+    
+    
+    .image { min-width: 35%; height: 100%; float: right; max-width: 35% }
+    
+    .image img { min-width: 100%; height: auto; max-height: 80%; max-width: 100% }
+    
+    .reveal h1 { font-size : 160%; text-align: center }
+    
+    /* h1.title { font-size : 350% } */
+    
+    h3.date { font-size: 100%; text-align: center }
+    h2.author { font-size: 100%; text-align: center }
+    
+    .reveal pre { box-shadow: 0 0 0 0 }
+    
+    .reveal pre code { padding: inherit }
+    
+    div.footer { position: fixed; right: 0%; top: -50px; }
+    
+    .reveal .slides { text-align: left; }
+    
+    .reveal h3 { font-size: 100%; margin-bottom: 1ex; }
+    
+    </style>
+</head>
+<body>
+  <div class="reveal">
+    <div class="slides">
+
+<section>
+    <h1 class="title">Haskell in the Browser With Haste</h1>
+    <h2 class="author">Lars Kuhtz <script type="text/javascript">
+<!--
+h='&#x61;&#108;&#x65;&#112;&#104;&#x63;&#108;&#x6f;&#x75;&#100;&#46;&#x63;&#x6f;&#x6d;';a='&#64;';n='&#108;&#x61;&#114;&#x73;';e=n+a+h;
+document.write('<a h'+'ref'+'="ma'+'ilto'+':'+e+'">'+e+'<\/'+'a'+'>');
+// -->
+</script><noscript>&#108;&#x61;&#114;&#x73;&#32;&#x61;&#116;&#32;&#x61;&#108;&#x65;&#112;&#104;&#x63;&#108;&#x6f;&#x75;&#100;&#32;&#100;&#x6f;&#116;&#32;&#x63;&#x6f;&#x6d;</noscript></h2>
+    <h3 class="date">2014-05-17</h3>
+</section>
+
+<section id="preparation" class="slide level1">
+<h1>Preparation</h1>
+<p>Get the code:</p>
+<pre class="sourceCode bash"><code class="sourceCode bash"><span class="kw">git</span> clone https://github.com/alephcloud/bayhac2014
+<span class="kw">cd</span> bayhac2014</code></pre>
+<p>Build Haste:</p>
+<pre class="sourceCode bash"><code class="sourceCode bash"><span class="kw">cabal</span> sandbox init
+<span class="kw">echo</span> <span class="st">&#39;constraints: scientific&lt;0.3&#39;</span> <span class="kw">&gt;&gt;</span> cabal.config
+<span class="kw">cabal</span> install haste-compiler -j
+<span class="kw">export</span> <span class="ot">PATH=</span>./.cabal-sandbox/bin:<span class="ot">$PATH</span></code></pre>
+<p>Setup Haste:</p>
+<pre class="sourceCode bash"><code class="sourceCode bash"><span class="kw">echo</span> <span class="st">&#39;solver: topdown&#39;</span> <span class="kw">&gt;&gt;</span> ~/.cabal/config
+<span class="kw">haste-boot</span>
+<span class="kw">sed</span> -i <span class="st">&#39;/solver: topdown/d&#39;</span> ~/.cabal/config</code></pre>
+</section>
+<section id="topics" class="slide level1">
+<h1>Topics</h1>
+<ol type="1">
+<li><p>Setup and usage of Haste</p></li>
+<li><p>Development of portable libraries for web applications</p></li>
+</ol>
+<div class="footer">
+<pre class="sourceCode bash"><code class="sourceCode bash"><span class="kw">git</span> clone https://github.com/alephcloud/bayhac2014</code></pre>
+</div>
+</section>
+<section id="part-1-setup-and-usage" class="slide level1">
+<h1>Part 1: Setup and Usage</h1>
+</section>
+<section id="outline" class="slide level1">
+<h1>Outline</h1>
+<ol type="1">
+<li>Installation and Setup</li>
+<li>Compiling and Deploying an Application</li>
+<li>FFI</li>
+<li>Marshaling of data and callbacks</li>
+</ol>
+<div class="footer">
+<pre class="sourceCode bash"><code class="sourceCode bash"><span class="kw">git</span> clone https://github.com/alephcloud/bayhac2014</code></pre>
+</div>
+</section>
+<section id="setup-haste" class="slide level1">
+<h1>Setup Haste</h1>
+<pre class="sourceCode bash"><code class="sourceCode bash"><span class="kw">cabal</span> install haste-compiler
+<span class="kw">haste-boot</span></code></pre>
+<p>well ...</p>
+<pre class="sourceCode bash"><code class="sourceCode bash"><span class="kw">echo</span> <span class="st">&#39;constraints: scientific&lt;0.3&#39;</span> <span class="kw">&gt;&gt;</span> cabal.config
+<span class="kw">cabal</span> install haste-compiler
+<span class="kw">echo</span> <span class="st">&#39;solver: topdown&#39;</span> <span class="kw">&gt;&gt;</span> ~/.cabal/config
+<span class="kw">haste-boot</span>
+<span class="kw">sed</span> -i <span class="st">&#39;/solver: topdown/d&#39;</span> ~/.cabal/config</code></pre>
+<div class="footer">
+<pre class="sourceCode bash"><code class="sourceCode bash"><span class="kw">git</span> clone https://github.com/alephcloud/bayhac2014</code></pre>
+</div>
+</section>
+<section id="hello-world-with-haste" class="slide level1">
+<h1>Hello World with Haste</h1>
+<p><code>contrib/hello-bayhac.hs</code>:</p>
+<pre class="sourceCode Haskell"><code class="sourceCode haskell"><span class="kw">module</span> <span class="dt">Main</span>
+( main
+) <span class="kw">where</span>
+
+<span class="kw">import </span><span class="dt">Haste</span>
+
+<span class="ot">main ::</span> <span class="dt">IO</span> ()
+main <span class="fu">=</span> alert <span class="st">&quot;hello bayhac&quot;</span></code></pre>
+<p>Compile:</p>
+<pre class="sourceCode bash"><code class="sourceCode bash"><span class="kw">hastec</span> hello-bayhac.hs</code></pre>
+<p><code>contrib/hello-bayhac.html</code>:</p>
+<pre class="sourceCode html"><code class="sourceCode html"><span class="dt">&lt;!DOCTYPE </span>html<span class="dt">&gt;</span>
+<span class="kw">&lt;html&gt;</span>
+    <span class="kw">&lt;head&gt;</span> <span class="kw">&lt;script</span><span class="ot"> type=</span><span class="st">&quot;text/javascript&quot;</span><span class="ot"> src=</span><span class="st">&quot;./hello-bayhac.js&quot;</span><span class="kw">&gt;&lt;/script&gt;&lt;/head&gt;</span>
+    <span class="kw">&lt;body/&gt;</span>
+<span class="kw">&lt;/html&gt;</span></code></pre>
+<p><a href="../contrib/hello-bayhac.html">Example</a></p>
+<div class="footer">
+<pre class="sourceCode bash"><code class="sourceCode bash"><span class="kw">git</span> clone https://github.com/alephcloud/bayhac2014</code></pre>
+</div>
+</section>
+<section id="haste-runtime" class="slide level1">
+<h1>Haste Runtime</h1>
+<p>Thunks:</p>
+<pre class="sourceCode javascript"><code class="sourceCode javascript"><span class="kw">function</span> <span class="fu">T</span>(f) {
+    <span class="kw">this</span>.<span class="fu">f</span> = <span class="kw">new</span> <span class="fu">F</span>(f);
+}
+
+<span class="kw">function</span> <span class="fu">F</span>(f) {
+    <span class="kw">this</span>.<span class="fu">f</span> = f;
+}</code></pre>
+<p>Evaluate to head normal form:</p>
+<pre class="sourceCode javascript"><code class="sourceCode javascript"><span class="kw">function</span> <span class="fu">E</span>(t) { <span class="co">/* ... */</span> }</code></pre>
+<p>Partial application:</p>
+<pre class="sourceCode javascript"><code class="sourceCode javascript"><span class="kw">function</span> <span class="fu">A</span>(f, args) { <span class="co">/* ... */</span> }</code></pre>
+<div class="footer">
+<pre class="sourceCode bash"><code class="sourceCode bash"><span class="kw">git</span> clone https://github.com/alephcloud/bayhac2014</code></pre>
+</div>
+</section>
+<section id="haste-runtime-1" class="slide level1">
+<h1>Haste Runtime</h1>
+<ul>
+<li>Arithmetic</li>
+<li>Strings: <code>toJSStr</code>, <code>fromJSStr</code></li>
+<li><code>jsAlert</code>, <code>jsPrompt</code>, <code>jsLog</code>, <code>jsEval</code>, etc.</li>
+<li><code>jsSetTimeout</code></li>
+<li>DOM manipulation</li>
+<li>Arrays and Pointers</li>
+<li>etc.</li>
+</ul>
+<div class="footer">
+<pre class="sourceCode bash"><code class="sourceCode bash"><span class="kw">git</span> clone https://github.com/alephcloud/bayhac2014</code></pre>
+</div>
+</section>
+<section id="compiled-code" class="slide level1">
+<h1>Compiled Code</h1>
+<p><code>contrib/hello-bayhac.hs</code>:</p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="kw">module</span> <span class="dt">Main</span>
+( main
+) <span class="kw">where</span>
+
+<span class="kw">import </span><span class="dt">Haste</span>
+
+<span class="ot">main ::</span> <span class="dt">IO</span> ()
+main <span class="fu">=</span> alert <span class="st">&quot;hello bayhac&quot;</span></code></pre>
+<p>Result:</p>
+<pre class="sourceCode javascript"><code class="sourceCode javascript"><span class="kw">var</span> _0=<span class="dv">0</span>,
+    _1=<span class="fu">unCStr</span>(<span class="st">&quot;hello bayhac&quot;</span>),
+    _2=<span class="kw">function</span>(_){<span class="kw">var</span> _3=<span class="fu">jsAlert</span>(<span class="fu">toJSStr</span>(<span class="fu">E</span>(_1)));<span class="kw">return</span> _0;},
+    _4=<span class="kw">function</span>(_){<span class="kw">return</span> <span class="fu">_2</span>(_);};
+<span class="kw">var</span> hasteMain = <span class="kw">function</span>() {<span class="fu">A</span>(_4, [<span class="dv">0</span>]);};
+<span class="ot">window</span>.<span class="fu">onload</span> = hasteMain;</code></pre>
+<div class="footer">
+<pre class="sourceCode bash"><code class="sourceCode bash"><span class="kw">git</span> clone https://github.com/alephcloud/bayhac2014</code></pre>
+</div>
+</section>
+<section id="marshaling" class="slide level1">
+<h1>Marshaling</h1>
+<p><code>[&lt;Constructor ID&gt;, &lt;Constructor Args&gt;, ...]</code></p>
+<p>Examples:</p>
+<table>
+<tr><th>
+Haskell
+</th><th>
+Javascript
+</th></tr>
+<tr><td>
+<code class="sourceCode haskell"><span class="dv">5</span><span class="ot"> ::</span> <span class="dt">Int</span></code>
+</td><td>
+<code class="sourceCode javascript">[<span class="dv">0</span>,<span class="dv">5</span>]</code>
+</td></tr>
+<tr><td>
+<code class="sourceCode haskell"><span class="dt">Nothing</span><span class="ot"> ::</span> <span class="dt">Maybe</span> ()</code>
+</td><td>
+<code class="sourceCode javascript">[<span class="dv">0</span>,[<span class="dv">0</span>]]</code>
+</td></tr>
+<tr><td>
+<code class="sourceCode haskell"><span class="dt">Just</span><span class="ot"> () ::</span> <span class="dt">Maybe</span> ()</code>
+</td><td>
+<code class="sourceCode javascript">[<span class="dv">1</span>,[<span class="dv">0</span>]]</code>
+</td></tr>
+<tr><td>
+<code class="sourceCode haskell">[<span class="dv">1</span>,<span class="dv">2</span>]<span class="ot"> ::</span> [<span class="dt">Int</span>]</code>
+</td><td>
+<code class="sourceCode javascript">[<span class="dv">1</span>,[<span class="dv">0</span>,<span class="dv">1</span>],[<span class="dv">1</span>,[<span class="dv">0</span>,<span class="dv">2</span>],[<span class="dv">0</span>]]]</code>
+</td></tr>
+</table>
+
+<div class="footer">
+<pre class="sourceCode bash"><code class="sourceCode bash"><span class="kw">git</span> clone https://github.com/alephcloud/bayhac2014</code></pre>
+</div>
+
+</section>
+<section id="marshaling-1" class="slide level1">
+<h1>Marshaling</h1>
+<p>Example code from the Haste runtime:</p>
+<pre class="sourceCode javascript"><code class="sourceCode javascript"><span class="kw">function</span> <span class="fu">arr2lst</span>(arr, elem) {
+    <span class="kw">if</span>(elem &gt;= <span class="ot">arr</span>.<span class="fu">length</span>) {
+        <span class="kw">return</span> [<span class="dv">0</span>];
+    }
+    <span class="kw">return</span> [<span class="dv">1</span>, <span class="fu">toHS</span>(arr[elem]), <span class="kw">new</span> <span class="fu">T</span>(<span class="kw">function</span>() {<span class="kw">return</span> <span class="fu">arr2lst</span>(arr,elem<span class="dv">+1</span>);})]
+}
+
+<span class="kw">function</span> <span class="fu">lst2arr</span>(xs) {
+    <span class="kw">var</span> arr = [];
+    <span class="kw">for</span>(; xs[<span class="dv">0</span>]; xs = <span class="fu">E</span>(xs[<span class="dv">2</span>])) {
+        <span class="ot">arr</span>.<span class="fu">push</span>(<span class="fu">E</span>(xs[<span class="dv">1</span>]));
+    }
+    <span class="kw">return</span> arr;
+}</code></pre>
+<div class="footer">
+<pre class="sourceCode bash"><code class="sourceCode bash"><span class="kw">git</span> clone https://github.com/alephcloud/bayhac2014</code></pre>
+</div>
+</section>
+<section id="ffi" class="slide level1">
+<h1>FFI</h1>
+<p>Static:</p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell">foreign <span class="kw">import </span>ccall &quot;alert&quot; alert2 :: <span class="dt">JSString</span> -&gt; <span class="dt">IO</span> ()</code></pre>
+<p>Dynamic:</p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">alert3 ::</span> <span class="dt">JSString</span> <span class="ot">-&gt;</span> <span class="dt">IO</span> ()
+alert3 <span class="fu">=</span> ffi <span class="st">&quot;(function(x) { alert(x); })&quot;</span></code></pre>
+<div class="footer">
+<pre class="sourceCode bash"><code class="sourceCode bash"><span class="kw">git</span> clone https://github.com/alephcloud/bayhac2014</code></pre>
+</div>
+</section>
+<section id="ffi-example" class="slide level1">
+<h1>FFI Example</h1>
+<pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="kw">module</span> <span class="dt">Main</span>
+( main
+) <span class="kw">where</span>
+
+<span class="kw">import </span><span class="dt">Haste</span>
+<span class="kw">import </span><span class="dt">Haste.Prim</span>
+<span class="kw">import </span><span class="dt">Haste.Foreign</span>
+
+foreign <span class="kw">import </span>ccall &quot;alert&quot; alert2 :: <span class="dt">JSString</span> -&gt; <span class="dt">IO</span> ()
+
+<span class="ot">alert3 ::</span> <span class="dt">JSString</span> <span class="ot">-&gt;</span> <span class="dt">IO</span> <span class="dt">Int</span>
+alert3 <span class="fu">=</span> ffi <span class="st">&quot;(function (x) { alert(x); return 0; })&quot;</span>
+
+foreign <span class="kw">import </span>ccall &quot;setTimeout&quot; timeout :: <span class="dt">JSFun</span> (<span class="dt">IO</span> ()) -&gt; <span class="dt">Int</span> -&gt; <span class="dt">IO</span> ()
+
+<span class="ot">main ::</span> <span class="dt">IO</span> ()
+main <span class="fu">=</span> <span class="kw">do</span>
+    alert2 <span class="fu">$</span> toJSStr <span class="st">&quot;hello bayhac 2&quot;</span>
+    alert3 <span class="fu">$</span> toJSStr <span class="st">&quot;hello bayhac 3&quot;</span>
+    flip timeout <span class="dv">2000</span> <span class="fu">.</span> mkCallback <span class="fu">.</span> alert2 <span class="fu">.</span> toJSStr <span class="fu">$</span> <span class="st">&quot;hello bayhac 4&quot;</span></code></pre>
+<p><a href="../contrib/hello-bayhac-ffi.html">Example</a></p>
+<div class="footer">
+<pre class="sourceCode bash"><code class="sourceCode bash"><span class="kw">git</span> clone https://github.com/alephcloud/bayhac2014</code></pre>
+</div>
+<!-- --------------------------------------------------------------------------- -->
+
+</section>
+<section id="part-2-portable-libraries-with-haste" class="slide level1">
+<h1>Part 2: Portable Libraries with Haste</h1>
+</section>
+<section id="outline-1" class="slide level1">
+<h1>Outline</h1>
+<ol type="1">
+<li>Example</li>
+<li>Sharing code with native builds</li>
+<li>Exporting an API</li>
+</ol>
+<div class="footer">
+<pre class="sourceCode bash"><code class="sourceCode bash"><span class="kw">git</span> clone https://github.com/alephcloud/bayhac2014</code></pre>
+</div>
+</section>
+<section id="example-application" class="slide level1">
+<h1>Example Application</h1>
+<ul>
+<li><p>A very simple encryption library.</p></li>
+<li><p>A very simple web email encryption application.</p></li>
+</ul>
+<p>Code:</p>
+<pre class="sourceCode bash"><code class="sourceCode bash"><span class="kw">git</span> clone https://github.com/alephcloud/bayhac2014</code></pre>
+</section>
+<section id="native-build" class="slide level1">
+<h1>Native build</h1>
+<pre class="sourceCode bash"><code class="sourceCode bash"><span class="kw">cabal</span> install --enable-tests
+<span class="kw">cabal</span> test</code></pre>
+<p>Result:</p>
+<p><a href="http://192.168.88.101:3535/package/bayhac2014-cryptmail">bayhac2014-cryptmail</a></p>
+<div class="footer">
+<pre class="sourceCode bash"><code class="sourceCode bash"><span class="kw">git</span> clone https://github.com/alephcloud/bayhac2014</code></pre>
+</div>
+</section>
+<section id="haskell-library-api" class="slide level1">
+<h1>Haskell Library API</h1>
+<pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="kw">newtype</span> <span class="dt">Password</span> <span class="fu">=</span> <span class="dt">Password</span> { unPassword <span class="ot">∷</span> <span class="dt">B.ByteString</span> }
+    <span class="kw">deriving</span> (<span class="dt">Eq</span>, <span class="dt">Code64</span>)
+
+<span class="kw">newtype</span> <span class="dt">CipherText</span> <span class="fu">=</span> <span class="dt">CipherText</span> { unCipherText <span class="ot">∷</span> <span class="dt">B.ByteString</span> }
+    <span class="kw">deriving</span> (<span class="dt">Eq</span>, <span class="dt">Code64</span>)
+
+<span class="kw">newtype</span> <span class="dt">PlainText</span> <span class="fu">=</span> <span class="dt">PlainText</span> { unPlainText <span class="ot">∷</span> <span class="dt">B.ByteString</span> }
+    <span class="kw">deriving</span> (<span class="dt">Eq</span>, <span class="dt">Code64</span>)
+
+encryptWithPwd <span class="ot">∷</span> <span class="dt">Password</span> <span class="ot">→</span> <span class="dt">PlainText</span> <span class="ot">→</span> <span class="dt">IO</span> <span class="dt">CipherText</span>
+decryptWithPwd <span class="ot">∷</span> <span class="dt">Password</span> <span class="ot">→</span> <span class="dt">CipherText</span> <span class="ot">→</span> <span class="dt">Either</span> <span class="dt">String</span> <span class="dt">PlainText</span></code></pre>
+<div class="footer">
+<pre class="sourceCode bash"><code class="sourceCode bash"><span class="kw">git</span> clone https://github.com/alephcloud/bayhac2014</code></pre>
+</div>
+</section>
+<section id="service-api" class="slide level1">
+<h1>Service API</h1>
+<pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="kw">class</span> (<span class="dt">FromJSON</span> α, <span class="dt">ToJSON</span> (<span class="dt">Response</span> α)) <span class="ot">⇒</span> <span class="dt">Request</span> α <span class="kw">where</span>
+    <span class="kw">type</span> <span class="dt">Response</span> α <span class="ot">∷</span> <span class="fu">*</span>
+    answerRequest <span class="ot">∷</span> α <span class="ot">→</span> <span class="dt">IO</span> (<span class="dt">Either</span> <span class="dt">String</span> (<span class="dt">Response</span> α))
+
+<span class="kw">data</span> <span class="dt">EncryptWithPwd</span> <span class="fu">=</span> <span class="dt">EncryptWithPwd</span>
+    { ePassword <span class="ot">∷</span> <span class="fu">!</span><span class="dt">Password</span>
+    , ePlainText <span class="ot">∷</span> <span class="fu">!</span><span class="dt">PlainText</span>
+    }
+
+<span class="kw">instance</span> <span class="dt">FromJSON</span> <span class="dt">EncryptWithPwd</span> <span class="kw">where</span>
+    parseJSON <span class="fu">=</span> withObject <span class="st">&quot;EncryptWithPwd&quot;</span> <span class="fu">$</span> \o <span class="ot">→</span> <span class="dt">EncryptWithPwd</span>
+        <span class="fu">&lt;$&gt;</span> o <span class="fu">.:</span> <span class="st">&quot;password&quot;</span>
+        <span class="fu">&lt;*&gt;</span> o <span class="fu">.:</span> <span class="st">&quot;plain_text&quot;</span>
+
+<span class="kw">data</span> <span class="dt">EncryptWithPwdR</span> <span class="fu">=</span> <span class="dt">EncryptWithPwdR</span>
+    { erCipherText <span class="ot">∷</span> <span class="fu">!</span><span class="dt">CipherText</span>
+    }
+
+<span class="kw">instance</span> <span class="dt">ToJSON</span> <span class="dt">EncryptWithPwdR</span> <span class="kw">where</span>
+    toJSON <span class="dt">EncryptWithPwdR</span>{<span class="fu">..</span>} <span class="fu">=</span> object
+        [ <span class="st">&quot;cipher_text&quot;</span> <span class="fu">.=</span> erCipherText
+        ]
+
+<span class="kw">instance</span> <span class="dt">Request</span> <span class="dt">EncryptWithPwd</span> <span class="kw">where</span>
+    <span class="kw">type</span> <span class="dt">Response</span> <span class="dt">EncryptWithPwd</span> <span class="fu">=</span> <span class="dt">EncryptWithPwdR</span>
+    answerRequest <span class="dt">EncryptWithPwd</span>{<span class="fu">..</span>} <span class="fu">=</span>
+        <span class="dt">Right</span> ∘ <span class="dt">EncryptWithPwdR</span> <span class="fu">&lt;$&gt;</span> encryptWithPwd ePassword ePlainText</code></pre>
+<div class="footer">
+<pre class="sourceCode bash"><code class="sourceCode bash"><span class="kw">git</span> clone https://github.com/alephcloud/bayhac2014</code></pre>
+</div>
+</section>
+<section id="haste-build" class="slide level1">
+<h1>Haste build</h1>
+<pre class="sourceCode bash"><code class="sourceCode bash"><span class="kw">rm</span> -rf dist
+<span class="kw">haste-inst</span> install</code></pre>
+<p>well ...</p>
+<pre class="sourceCode bash"><code class="sourceCode bash"><span class="kw">rm</span> -rf dist
+<span class="kw">mv</span> cabal.sandbox.config cabal.sandbox.config.disabled
+<span class="kw">haste-inst</span> install -fhaste --dependencies-only
+<span class="kw">haste-inst</span> configure -fhaste
+<span class="kw">haste-inst</span> build</code></pre>
+<p><code>bayhac2014-cryptmail.cabal</code>:</p>
+<pre class="cabal"><code>...
+ghc-options: -Wall --start=asap --with-js=lib/sjcl.js,lib/bayhac2014-cryptmail.js
+...</code></pre>
+<div class="footer">
+<pre class="sourceCode bash"><code class="sourceCode bash"><span class="kw">git</span> clone https://github.com/alephcloud/bayhac2014</code></pre>
+</div>
+<p>Result: <a href="../Main.html">bayhac2014-cryptmail-app</a></p>
+</section>
+<section id="javascript-api" class="slide level1">
+<h1>Javascript API</h1>
+<pre class="sourceCode javascript"><code class="sourceCode javascript"><span class="kw">var</span> logg = <span class="kw">function</span>(str) { <span class="ot">console</span>.<span class="fu">log</span>(str); <span class="kw">return</span>; }
+<span class="kw">var</span> api = <span class="kw">new</span> <span class="fu">API</span>();
+
+<span class="kw">var</span> req = { <span class="st">&quot;password&quot;</span> : <span class="fu">btoa</span>(pwd), <span class="st">&quot;plain_text&quot;</span> : <span class="fu">btoa</span>(msg) };
+<span class="ot">api</span>.<span class="fu">encrypt_with_password</span>(req, logg, logg, <span class="kw">function</span> (r) {
+    <span class="ot">console</span>.<span class="fu">log</span>(<span class="ot">r</span>.<span class="fu">cipher_text</span>);
+}
+
+<span class="kw">var</span> req = { <span class="st">&quot;password&quot;</span> : <span class="fu">btoa</span>(pwd), <span class="st">&quot;cipher_text&quot;</span> : msg };
+<span class="ot">api</span>.<span class="fu">decrypt_with_password</span>(, logg, logg, <span class="kw">function</span> (r) {
+   <span class="ot">console</span>.<span class="fu">log</span>(<span class="ot">r</span>.<span class="fu">plain_text</span>);
+}</code></pre>
+<p>The Javascript API exposes the service API</p>
+<ul>
+<li>Supports usage of web-workers</li>
+<li>Switching between server and client API</li>
+<li>Easy compatibility testing</li>
+</ul>
+<div class="footer">
+<pre class="sourceCode bash"><code class="sourceCode bash"><span class="kw">git</span> clone https://github.com/alephcloud/bayhac2014</code></pre>
+</div>
+</section>
+<section id="sharing-code-with-native-builds" class="slide level1">
+<h1>Sharing Code with Native Builds</h1>
+<div class="left" style="padding-right: 1em">
+<p>Examples:</p>
+<ul>
+<li>Aeson instances</li>
+<li>Cryptographic protocols</li>
+<li>Special arithmetic</li>
+<li>Business logic</li>
+</ul>
+</div>
+<div>
+<p>Low-level dependencies:</p>
+<ul>
+<li>Javascript big integers</li>
+<li>ByteStrings</li>
+<li>Text</li>
+<li>Cryptographic primitives</li>
+</ul>
+</div>
+<div class="center">
+<p>Dispatch Options:</p>
+<ul>
+<li>Package level abstraction</li>
+<li>Module level abstraction</li>
+<li>Code level abstraction with CPP</li>
+</ul>
+</div>
+<div class="footer">
+<pre class="sourceCode bash"><code class="sourceCode bash"><span class="kw">git</span> clone https://github.com/alephcloud/bayhac2014</code></pre>
+</div>
+</section>
+<section id="sharing-code-with-native-builds-1" class="slide level1">
+<h1>Sharing Code with Native Builds</h1>
+<pre class="cabal"><code>Flag haste
+    description: build with haste-compiler
+    default: False
+
+Library
+    exposed-modules:
+        BayHac2014.Cryptmail.Text
+        BayHac2014.Cryptmail.ByteString
+        BayHac2014.Cryptmail.PasswordEncryption
+        BayHac2014.Cryptmail.ServiceApi
+        BayHac2014.Cryptmail.Json
+    if flag(haste)
+        build-depends: ...
+    else
+        build-depends: ...
+
+Executable cryptmail-client
+    if ! flag(haste)
+        buildable: False
+
+Executable cryptmail-server
+    if flag(haste)
+        buildable: False</code></pre>
+<div class="footer">
+<pre class="sourceCode bash"><code class="sourceCode bash"><span class="kw">git</span> clone https://github.com/alephcloud/bayhac2014</code></pre>
+</div>
+</section>
+<section id="abstraction-of-low-level-modules" class="slide level1">
+<h1>Abstraction of Low-Level Modules</h1>
+<pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="kw">newtype</span> <span class="dt">ByteString</span> <span class="fu">=</span> <span class="dt">ByteString</span> <span class="dt">JSAny</span>
+
+foreign <span class="kw">import </span>ccall &quot;bsEmpty&quot; j_bytesEmpty ∷ <span class="dt">IO</span> <span class="dt">ByteString</span>
+foreign <span class="kw">import </span>ccall &quot;bsConcat&quot; j_bytesConcat ∷ <span class="dt">ByteString</span> → <span class="dt">ByteString</span> → <span class="dt">IO</span> <span class="dt">ByteString</span>
+foreign <span class="kw">import </span>ccall &quot;bsEqual&quot; j_bytesEqual ∷ <span class="dt">ByteString</span> → <span class="dt">ByteString</span> → <span class="dt">Bool</span>
+foreign <span class="kw">import </span>ccall &quot;bsLength&quot; j_bytesLength ∷ <span class="dt">ByteString</span> → <span class="dt">Int</span>
+
+<span class="kw">instance</span> <span class="dt">Monoid</span> <span class="dt">ByteString</span> <span class="kw">where</span>
+    mempty <span class="fu">=</span> unsafePerformIO <span class="fu">$</span> j_bytesEmpty
+    mappend a b <span class="fu">=</span> unsafePerformIO <span class="fu">$</span> j_bytesConcat a b
+
+    <span class="ot">{-# INLINE mempty #-}</span>
+    <span class="ot">{-# INLINE mappend #-}</span>
+
+<span class="kw">instance</span> <span class="dt">Eq</span> <span class="dt">ByteString</span> <span class="kw">where</span>
+    (<span class="fu">==</span>) a b <span class="fu">=</span> j_bytesEqual a b
+
+    <span class="ot">{-# INLINE (==) #-}</span>
+
+length <span class="ot">∷</span> <span class="dt">ByteString</span> <span class="ot">→</span> <span class="dt">Int</span>
+length <span class="fu">=</span> j_bytesLength</code></pre>
+</section>
+<section id="export-of-javascript-api" class="slide level1">
+<h1>Export of Javascript API</h1>
+<pre class="sourceCode haskell"><code class="sourceCode haskell">main <span class="ot">∷</span> <span class="dt">IO</span> ()
+main <span class="fu">=</span> <span class="kw">do</span>
+    register <span class="st">&quot;encrypt_with_password&quot;</span> (asyncRequest <span class="ot">∷</span> <span class="dt">ApiMethod</span> <span class="dt">EncryptWithPwd</span>)
+    register <span class="st">&quot;decrypt_with_password&quot;</span> (asyncRequest <span class="ot">∷</span> <span class="dt">ApiMethod</span> <span class="dt">DecryptWithPwd</span>)
+
+<span class="co">-- -------------------------------------------------------------------------- --</span>
+
+<span class="kw">type</span> <span class="dt">ApiMethod</span> α
+    <span class="fu">=</span> α                    <span class="co">-- ^ argument</span>
+    <span class="ot">→</span> (<span class="dt">JSString</span> <span class="ot">→</span> <span class="dt">IO</span> ())   <span class="co">-- ^ log callback</span>
+    <span class="ot">→</span> (<span class="dt">JSString</span> <span class="ot">→</span> <span class="dt">IO</span> ())   <span class="co">-- ^ failure callback</span>
+    <span class="ot">→</span> (<span class="dt">Response</span> α <span class="ot">→</span> <span class="dt">IO</span> ()) <span class="co">-- ^ success callback</span>
+    <span class="ot">→</span> <span class="dt">IO</span> ()
+
+register <span class="ot">∷</span> (<span class="dt">FromJSON</span> α, <span class="dt">ToJSON</span> (<span class="dt">Response</span> α)) <span class="ot">⇒</span> <span class="dt">JSString</span> <span class="ot">→</span> <span class="dt">ApiMethod</span> α <span class="ot">→</span> <span class="dt">IO</span> ()
+
+asyncRequest <span class="ot">∷</span> <span class="dt">Request</span> α <span class="ot">⇒</span> <span class="dt">ApiMethod</span> α
+
+<span class="kw">type</span> <span class="dt">FCallback</span>
+    <span class="fu">=</span> <span class="dt">Ptr</span> <span class="dt">Value</span>                <span class="co">-- ^ argument</span>
+    <span class="ot">→</span> <span class="dt">Ptr</span> (<span class="dt">JSString</span> <span class="ot">→</span> <span class="dt">IO</span> ())   <span class="co">-- ^ log method</span>
+    <span class="ot">→</span> <span class="dt">Ptr</span> (<span class="dt">JSString</span> <span class="ot">→</span> <span class="dt">IO</span> ())   <span class="co">-- ^ failure continuation</span>
+    <span class="ot">→</span> <span class="dt">Ptr</span> (<span class="dt">Ptr</span> <span class="dt">Value</span> <span class="ot">→</span> <span class="dt">IO</span> ())  <span class="co">-- ^ success continuation</span>
+    <span class="ot">→</span> <span class="dt">IO</span> ()
+
+foreign <span class="kw">import </span>ccall &quot;addApiMethod&quot; js_add_api_method ∷ <span class="dt">JSString</span> → <span class="dt">JSFun</span> <span class="dt">FCallback</span> → <span class="dt">IO</span> ()</code></pre>
+</section>
+<section id="export-of-javascript-api-1" class="slide level1">
+<h1>Export of Javascript API</h1>
+<pre class="sourceCode javascript"><code class="sourceCode javascript"><span class="kw">function</span> <span class="fu">API</span> () {
+    <span class="kw">return</span> <span class="kw">this</span>;
+}
+
+<span class="ot">API</span>.<span class="ot">prototype</span>.<span class="fu">addMethod</span> = <span class="kw">function</span> (name, method) {
+    <span class="ot">API</span>.<span class="fu">prototype</span>[name] = <span class="kw">function</span> (arg, log, fail, succ) {
+        <span class="kw">var</span> successCB = <span class="kw">function</span> (hsResult) {
+            <span class="co">/* convert result from the Haste JSON representation into a Javascript Object */</span>
+        }
+        <span class="co">/* parse the argument object into the Haste JSON representation */</span>
+        <span class="co">/* call the method callback */</span>
+        <span class="kw">var</span> mapply = <span class="kw">function</span> () { <span class="kw">return</span> <span class="fu">A</span>(method,[[<span class="dv">0</span>,hsArg],[<span class="dv">0</span>,log],[<span class="dv">0</span>,fail],[<span class="dv">0</span>,successCB],<span class="dv">0</span>]); };
+        <span class="fu">setTimeout</span>(mapply,<span class="dv">0</span>);
+    }
+    <span class="kw">return</span> <span class="dv">0</span>;
+}
+
+<span class="kw">function</span> <span class="fu">addApiMethod</span>(name, method) {
+    <span class="ot">API</span>.<span class="ot">prototype</span>.<span class="fu">addMethod</span>(name, method);
+}
+
+<span class="kw">function</span> <span class="fu">calls</span>(f,s) { <span class="fu">f</span>(<span class="fu">E</span>(s)[<span class="dv">1</span>]); }
+<span class="kw">function</span> <span class="fu">callv</span>(f,v) { <span class="fu">f</span>(v[<span class="dv">1</span>]); }</code></pre>
+<div class="footer">
+<pre class="sourceCode bash"><code class="sourceCode bash"><span class="kw">git</span> clone https://github.com/alephcloud/bayhac2014</code></pre>
+</div>
+</section>
+<section id="misc-topics" class="slide level1">
+<h1>Misc Topics</h1>
+<ul>
+<li>JSON serialization and marshaling of JSON <code>Value</code></li>
+<li>Calling Javascript callbacks from Haskell</li>
+<li>Asynchronous callback execution</li>
+<li>Concurrency</li>
+<li>Integration with <em>haste-ffi-parser</em></li>
+<li>Managing Javascript dependencies for linked libraries</li>
+<li>QuickCheck testing of Javascript builds</li>
+<li>Exception handling</li>
+</ul>
+<div class="footer">
+<pre class="sourceCode bash"><code class="sourceCode bash"><span class="kw">git</span> clone https://github.com/alephcloud/bayhac2014</code></pre>
+</div>
+</section>
+    </div>
+  </div>
+
+  <script src="reveal.js/lib/js/head.min.js"></script>
+  <script src="reveal.js/js/reveal.min.js"></script>
+
+  <script>
+
+      // Full list of configuration options available here:
+      // https://github.com/hakimel/reveal.js#configuration
+      Reveal.initialize({
+        controls: true,
+        progress: true,
+        history: true,
+        center: true,
+        theme: 'sky', // available themes are in /css/theme
+        transition: Reveal.getQueryHash().transition || 'default', // default/cube/page/concave/zoom/linear/fade/none
+
+        // Optional libraries used to extend on reveal.js
+        dependencies: [
+          { src: 'reveal.js/lib/js/classList.js', condition: function() { return !document.body.classList; } },
+          { src: 'reveal.js/plugin/zoom-js/zoom.js', async: true, condition: function() { return !!document.body.classList; } },
+          { src: 'reveal.js/plugin/notes/notes.js', async: true, condition: function() { return !!document.body.classList; } },
+//          { src: 'reveal.js/plugin/search/search.js', async: true, condition: function() { return !!document.body.classList; }, }
+//          { src: 'reveal.js/plugin/remotes/remotes.js', async: true, condition: function() { return !!document.body.classList; } }
+]});
+    </script>
+  </body>
+</html>

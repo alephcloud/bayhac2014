@@ -9,8 +9,6 @@
 
 dist/*
 
-slides/reveal.js/
-
 *.swp
 
 src/Client.js
